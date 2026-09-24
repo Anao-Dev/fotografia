@@ -261,24 +261,43 @@ export function EvelynHome() {
     gsap.fromTo(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.55, ease: 'power2.inOut' })
   }, [roleIndex, reduced])
 
-  /* HERO — parallax por camadas + revelação no scroll (§8–§9) */
+  /* HERO — parallax por camadas + revelação no scroll (§8–§9)
+     matchMedia: no mobile o deslocamento é vertical, sem empurrar a foto para fora */
   useEffect(() => {
     if (reduced) return
     const ctx = gsap.context(() => {
-      gsap
-        .timeline({
-          scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
-        })
-        .to('.hero-bg', { yPercent: 16, ease: 'none' }, 0)
-        .to('.hero-image-wrap', { yPercent: -10, xPercent: -12, rotate: 5, ease: 'none' }, 0)
-        .to('.hero-copy-intro', { opacity: 0, y: -40, ease: 'none' }, 0)
-        .fromTo(
-          '.hero-reveal',
-          { yPercent: 112 },
-          { yPercent: 0, stagger: 0.16, ease: 'power2.out', duration: 0.4 },
-          0.08,
-        )
-      /* entrada suave da hero */
+      const mm = gsap.matchMedia()
+      mm.add('(min-width: 701px)', () => {
+        gsap
+          .timeline({
+            scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
+          })
+          .to('.hero-bg', { yPercent: 16, ease: 'none', duration: 1 }, 0)
+          .to('.hero-image-wrap', { yPercent: -10, xPercent: -12, rotate: 5, ease: 'none', duration: 1 }, 0)
+          .to('.hero-copy-intro', { opacity: 0, y: -40, ease: 'none', duration: 1 }, 0)
+          .fromTo(
+            '.hero-reveal',
+            { yPercent: 112 },
+            { yPercent: 0, stagger: 0.1, ease: 'power2.out', duration: 0.22 },
+            0,
+          )
+      })
+      mm.add('(max-width: 700px)', () => {
+        gsap
+          .timeline({
+            scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
+          })
+          .to('.hero-bg', { yPercent: 10, ease: 'none', duration: 1 }, 0)
+          .to('.hero-image-wrap', { yPercent: -14, ease: 'none', duration: 1 }, 0)
+          .to('.hero-copy-intro', { opacity: 0, y: -40, ease: 'none', duration: 1 }, 0)
+          .fromTo(
+            '.hero-reveal',
+            { yPercent: 112 },
+            { yPercent: 0, stagger: 0.1, ease: 'power2.out', duration: 0.22 },
+            0,
+          )
+      })
+      /* entrada suave da hero (comum a todos os breakpoints) */
       gsap.fromTo(
         '.hero-image-wrap',
         { opacity: 0, y: 56 },
@@ -349,7 +368,7 @@ export function EvelynHome() {
     if (!section || !track) return
 
     const mm = gsap.matchMedia()
-    mm.add('(min-width: 701px)', () => {
+    mm.add('(min-width: 900px)', () => {
       const getDistance = () => Math.max(0, track.scrollWidth - window.innerWidth + 64)
       const tween = gsap.to(track, {
         x: () => -getDistance(),
@@ -513,7 +532,7 @@ export function EvelynHome() {
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             controls={reduced || undefined}
           />
           <div className="scrub-caption">
@@ -530,6 +549,7 @@ export function EvelynHome() {
             <p className="section-index">05 — o tempo de um encontro</p>
             <h2>Devagar,<br /><em>como a vida.</em></h2>
             <p>Uma sessão não precisa ser apressada. Ela pode ser feita de presença, luz e pequenos movimentos.</p>
+            <p className="drag-hint" aria-hidden="true">Arraste para o lado</p>
           </div>
           {horizontalFrames.map((frame) => (
             <figure key={frame.src}>
